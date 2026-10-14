@@ -37,7 +37,9 @@ func GetProxyConn(ctx context.Context, proxyUrl *url.URL, address string, sslIns
 		})
 		conn, err = dc.DialContext(ctx, "tcp", address)
 		if err != nil {
-			conn.Close()
+			// conn is nil when DialContext fails; calling Close() here
+			// panics with a nil pointer dereference (see upstream issue
+			// lqqyt2423/go-mitmproxy#110).
 			return nil, err
 		}
 		return conn, err
