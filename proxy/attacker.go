@@ -386,7 +386,9 @@ func (a *attacker) httpsTlsDial(ctx context.Context, cconn net.Conn, conn net.Co
 		cconn.Close()
 		conn.Close()
 		errChan2 <- err
-		log.Error(err)
+		// 目标站 TLS 握手失败（站点不配合/上游代理阻断）是攻击流量下的常态，
+		// 降为 Debug 且以真实目标地址上报，避免与客户端握手失败混在 Error 里。
+		log.WithField("target", connCtx.ServerConn.Address).Debug(err)
 		return
 	}
 	serverTlsStateChan <- connCtx.ServerConn.tlsState
